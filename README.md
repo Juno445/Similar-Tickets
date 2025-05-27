@@ -159,7 +159,7 @@ Pull requests and suggestions are welcome! For major changes, please open an iss
 
 ## License
 
-[MIT](LICENSE) (or your organization's preferred license notice)
+[MIT](LICENSE)
 
 ---
 
@@ -171,4 +171,4 @@ Pull requests and suggestions are welcome! For major changes, please open an iss
 
 ---
 
-_If you have questions or need configuration help, see Issues or contact the maintainer._
+Created by Bryan Weston.
