@@ -43,8 +43,8 @@ Duplicate Ticket Finder is a Dockerized Python application that fetches tickets 
 **Clone the repository:**
 
 ```sh
-git clone https://github.com/yourorg/duplicate-ticket-finder.git
-cd duplicate-ticket-finder
+git clone https://github.com/Juno445/Similar-Tickets.git
+cd Similar-Tickets
 ```
 
 ---
