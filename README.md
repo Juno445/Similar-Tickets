@@ -1,5 +1,3 @@
-Certainly! Here is the previous professional README content as plain Markdown (no fenced code block wrapping):
-
 # Duplicate Ticket Finder
 
 Duplicate Ticket Finder is a Dockerized Python application that fetches tickets from a Freshservice instance, detects potential duplicates using powerful ML-based text embeddings (via [sentence-transformers](https://www.sbert.net/)), and outputs a CSV of likely duplicates for manual review. It is designed for automated, production deployment (e.g., scheduled weekly via Docker and Task Scheduler).
