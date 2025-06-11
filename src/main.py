@@ -78,7 +78,7 @@ def fetch_dispatch_tickets(csv_filename):
         }
         for t in all_tickets
     ]
-    print(json.dumps(slim_tickets, indent=2))
+    logging.debug(json.dumps(slim_tickets, indent=2))
     with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
         fieldnames = ['Ticket ID', 'Subject', 'Requester Email', 'Date Created', 'Description']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
