@@ -52,12 +52,12 @@ cd Similar-Tickets
 1. **Build the Docker image:**
 
    ```sh
-   docker build -t ticket-dedup -f docker/Dockerfile .
+   docker build -t ticket-dedup -f Dockerfile .
    ```
 
 2. **(Windows only) Make sure Docker Desktop has access to the drive/folder you’ll use for output.**
 
-3. **Run the container and mount a local data folder:**
+3. **Run the container and mount a local data folder (uses `.env` for creds):**
 
    For Windows, use forward slashes and correct drive letter:
    ```sh
@@ -87,8 +87,8 @@ cd Similar-Tickets
 
 ## Configuration
 
-- **API keys, group filters, and deduplication parameters** are set in `src/main.py`.
-- _For production_: Move secrets (API key, domain, etc.) to environment variables or `config.json`, and load them in the script.
+- **API keys and domain** should be provided via environment variables or a `config.json` file.
+- Copy `.env.example` to `.env` and fill in your credentials for local runs.
 - _Config options include:_
   - **embedding_model**: sentence-transformers model name
   - **similarity_threshold**: float (0 to 1, higher is stricter)
