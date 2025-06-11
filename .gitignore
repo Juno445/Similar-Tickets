@@ -1,0 +1,19 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+
+# Environment variables
+.env
+.env.*
+!.env.example
+!config.json.example
+
+# Data output
+/data/
+*.csv
+
+# Logs
+*.log
+
+# Misc
+.DS_Store

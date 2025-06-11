@@ -1,5 +1,6 @@
 # === Imports ===
 from urllib.parse import quote
+import os
 import requests
 from requests.auth import HTTPBasicAuth
 import json
@@ -7,15 +8,25 @@ import csv
 from bs4 import BeautifulSoup
 import pandas as pd
 import numpy as np
-from sentence_transformers import SentenceTransformer, util
 from tqdm import tqdm
 import logging
 import smtplib
 from email.message import EmailMessage
 
 # === Configuration ===
-API_KEY = "X" # Replace with your Freshservice API key
-DOMAIN = "X" # Replace with your Freshservice domain (e.g., "yourcompany")
+# Load credentials from environment variables or optional config.json
+API_KEY = os.getenv("API_KEY")
+DOMAIN = os.getenv("DOMAIN")
+if not API_KEY or not DOMAIN:
+    try:
+        with open("config.json", "r", encoding="utf-8") as f:
+            cfg = json.load(f)
+            API_KEY = API_KEY or cfg.get("API_KEY")
+            DOMAIN = DOMAIN or cfg.get("DOMAIN")
+    except FileNotFoundError:
+        pass
+if not API_KEY or not DOMAIN:
+    raise ValueError("API_KEY and DOMAIN must be set via environment or config.json")
 DUPLICATE_CONFIG = {
     'embedding_model': 'all-MiniLM-L6-v2',
     'similarity_threshold': 0.87,
@@ -43,9 +54,13 @@ def fetch_dispatch_tickets(csv_filename):
     all_tickets = []
     while True:
         url = f"{base_url}&page={page}&per_page={per_page}"
-        resp = requests.get(url, auth=HTTPBasicAuth(API_KEY, 'X'))
+        try:
+            resp = requests.get(url, auth=HTTPBasicAuth(API_KEY, 'X'))
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Request failed: {e}")
+            break
         if resp.status_code != 200:
-            print(f"Error: HTTP {resp.status_code}\n{resp.text}")
+            logging.error("Error: HTTP %s\n%s", resp.status_code, resp.text)
             break
         data = resp.json()
         tickets = data.get("tickets", [])
@@ -63,7 +78,7 @@ def fetch_dispatch_tickets(csv_filename):
         }
         for t in all_tickets
     ]
-    print(json.dumps(slim_tickets, indent=2))
+    logging.debug(json.dumps(slim_tickets, indent=2))
     with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
         fieldnames = ['Ticket ID', 'Subject', 'Requester Email', 'Date Created', 'Description']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -84,6 +99,7 @@ def load_and_prepare_data(input_file):
     return df
 
 def find_duplicates(df, CONFIG):
+    from sentence_transformers import SentenceTransformer, util
     model = SentenceTransformer(CONFIG['embedding_model'])
     alpha = CONFIG.get('subject_weight', 0.3)  # weight for subject (0.0-1.0)
     
