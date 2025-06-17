@@ -1,0 +1,25 @@
+# ──────────────────────────────────────────────────────────
+# Runtime & training dependencies
+# Pin major versions for reproducibility; minor/patch can float.
+# ──────────────────────────────────────────────────────────
+fastapi==0.110.0
+uvicorn[standard]==0.29.0          # gunicorn-worker, colorlog, etc.
+sentence-transformers==2.6.1
+torch==2.2.2                       # CPU build; switch to +cu118 for GPU
+faiss-cpu==1.7.4
+scikit-learn==1.4.2
+numpy==1.26.4
+pandas==2.2.2
+python-dateutil==2.9.0.post0
+loguru==0.7.2
+requests==2.31.0
+pydantic==2.6.4                    # config & validation
+prometheus-client==0.20.0
+streamlit==1.32.2
+
+# ──────────────────────────────────────────────────────────
+# Optional / convenience
+# ──────────────────────────────────────────────────────────
+# If you plan to run trainer in notebooks:
+# matplotlib==3.8.4
+# seaborn==0.13.2

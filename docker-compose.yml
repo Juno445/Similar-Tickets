@@ -1,0 +1,91 @@
+# ---------------------------------------------------------------------
+# Anything in the same directory as this file is automatically read
+# from `.env` by docker-compose.  No extra `env_file` directive needed.
+# ---------------------------------------------------------------------
+services:
+  trainer:
+    build:
+      context: .
+      dockerfile: trainer/Dockerfile
+    image: semantic-ticket-finder:latest
+    environment:
+      FS_DOMAIN:  "${FS_DOMAIN}"
+      FS_API_KEY: "${FS_API_KEY}"
+      FS_VANITY:  "${FS_VANITY}"
+      GROUP_IDS:  "${GROUP_IDS}"
+      INDEX_PATH: "/shared"
+      DAYS_BACK:  "${DAYS_BACK:-60}"
+      HF_TOKEN:   "${HF_TOKEN:-}"
+      HF_TOKEN_FILE: "${HF_TOKEN_FILE:-}"
+      MODEL_CACHE_DIR: "/app/models"
+    command: ["python", "-m", "trainer.train_freshservice"]
+    volumes:
+      - ticket_index_volume:/shared
+      - model_cache_volume:/app/models
+    restart: "no"
+
+  api:
+    build:
+      context: .
+      dockerfile: serve/Dockerfile
+    image: semantic-ticket-finder:latest
+    environment:
+      FS_DOMAIN:  "${FS_DOMAIN}"
+      FS_VANITY:  "${FS_VANITY}"
+      FS_API_KEY: "${FS_API_KEY}"
+      GROUP_IDS:  "${GROUP_IDS}"
+      INDEX_PATH: "/shared"
+      RELOAD_TOKEN: "${RELOAD_TOKEN}"
+      SIMILARITY_THRESHOLD: "${SIMILARITY_THRESHOLD:-0.9}"
+      HF_TOKEN:   "${HF_TOKEN:-}"
+      HF_TOKEN_FILE: "${HF_TOKEN_FILE:-}"
+      MODEL_CACHE_DIR: "/app/models"
+      TRANSFORMERS_OFFLINE: "1"
+      HF_HUB_OFFLINE: "1"
+    command: ["/app/entrypoint.sh"]
+    volumes:
+      - ticket_index_volume:/shared:ro
+      - model_cache_volume:/app/models
+    ports:
+      - "8000:8000"
+    depends_on:
+      trainer:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8000/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+  reviewer:
+    image: semantic-ticket-finder:latest   # same build
+    command: >
+      bash -c "export PYTHONPATH=/app && streamlit run src/review_console.py
+      --server.port 8501 --server.address 0.0.0.0"
+    environment:
+      FS_DOMAIN:  "${FS_DOMAIN}"
+      FS_VANITY:  "${FS_VANITY}"
+      FS_API_KEY: "${FS_API_KEY}"
+      GROUP_IDS:  "${GROUP_IDS}"
+      REVIEW_USER: "${REVIEW_USER:-reviewer}"
+      REVIEW_SIM_LOWER: "${REVIEW_SIM_LOWER:-0.65}"
+      REVIEW_SIM_UPPER: "${REVIEW_SIM_UPPER:-0.9}"
+      REVIEW_MAX: "${REVIEW_MAX:-100}"
+      REVIEW_DAYS_BACK: "${REVIEW_DAYS_BACK:-60}"
+      PYTHONPATH: "/app"
+      HF_TOKEN:   "${HF_TOKEN:-}"
+      HF_TOKEN_FILE: "${HF_TOKEN_FILE:-}"
+      MODEL_CACHE_DIR: "/app/models"
+      TRANSFORMERS_OFFLINE: "1"
+      HF_HUB_OFFLINE: "1"
+    volumes:
+      - ticket_index_volume:/shared:ro  # read-only is fine
+      - model_cache_volume:/app/models
+    ports:
+      - "8501:8501"
+    depends_on:
+      trainer:
+        condition: service_completed_successfully 
+
+volumes:
+  ticket_index_volume: {}
+  model_cache_volume: {}
