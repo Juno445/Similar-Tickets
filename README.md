@@ -340,8 +340,6 @@ The suite uses pytest + coverage and mocks HTTP calls – no network dependency.
 
 ## 🔄  CI/CD Pipeline
 
-The project includes a comprehensive GitHub Actions pipeline that runs on every push and PR:
-
 ### Pipeline Jobs
 
 1. **Test Suite** - Runs tests across Python 3.10, 3.11, and 3.12
